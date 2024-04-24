@@ -1,23 +1,21 @@
-const http = require("http");
-const express = require("express");
-const bodyParser = require("body-parser");
+import * as http from "http";
+import express from "express";
+import bodyParser from "body-parser";
+import { Pool, PoolConnection, createPool } from "mariadb";
+
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-const mariadb = require("mariadb");
-
-const pool = mariadb.createPool({
+const pool: Pool = createPool({
   host: "localhost",
   user: "root",
   password: "gandro",
   connectionLimit: 5,
 });
 
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-
 app.get("/animals", async (req, res) => {
-  let connection;
+  let connection: PoolConnection | undefined;
   try {
     connection = await pool.getConnection();
     const rows = await connection.query(
@@ -27,34 +25,44 @@ app.get("/animals", async (req, res) => {
     const jsonS = JSON.stringify(rows);
     res.writeHead(200);
     res.end(jsonS);
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
 });
 
 app.post("/animals", async (req, res) => {
-  let connection;
+  let connection: PoolConnection | undefined;
   try {
     const { hologram_name, weight, superpower, extinct_since } = req.body;
     connection = await pool.getConnection();
     const rows = await connection.query(
-      `INSERT INTO trial_tasks.virtualZoo (hologram_name, weight, superpower, extinct_since) VALUES ('${hologram_name}', ${weight}, '${superpower}', ${extinct_since});`
+      `INSERT INTO trial_tasks.virtualZoo (hologram_name, weight, superpower, extinct_since) VALUES
+       ('${hologram_name}', ${weight}, '${superpower}', ${extinct_since});`
     );
     console.log(rows);
     res.writeHead(201);
     res.end("Animal was added");
   } catch (error) {
     console.log(error);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 });
 
 app.patch("/animals/:id", async (req, res) => {
-  let connection;
+  let connection: PoolConnection | undefined;
   try {
-    console.log(req.body);
     const { id } = req.params;
     const { hologram_name, weight, superpower, extinct_since } = req.body;
     connection = await pool.getConnection();
 
-    let updateFields = [];
+    let updateFields: string[] = [];
     if (hologram_name) updateFields.push(`hologram_name = '${hologram_name}'`);
     if (weight) updateFields.push(`weight = '${weight}'`);
     if (superpower) updateFields.push(`superpower = '${superpower}'`);
@@ -70,24 +78,31 @@ app.patch("/animals/:id", async (req, res) => {
     res.end("Animal data was changed");
   } catch (error) {
     console.log(error);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 });
 
 app.delete("/animals/:id", async (req, res) => {
-  let connection;
+  let connection: PoolConnection | undefined;
   try {
-    console.log(req.body);
     const { id } = req.params;
-
     connection = await pool.getConnection();
     const rows = await connection.query(
-      `Delete FROM trial_tasks.virtualZoo WHERE id = ${id};`
+      `DELETE FROM trial_tasks.virtualZoo WHERE id = ${id};`,
+      [id]
     );
     console.log(rows);
     res.writeHead(200);
     res.end("Animal was deleted");
   } catch (error) {
     console.log(error);
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 });
 

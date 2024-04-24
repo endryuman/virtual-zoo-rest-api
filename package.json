@@ -1,10 +1,11 @@
 {
+  "type": "module",
   "name": "virtual-zoo-rest-api",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "web-dev-server --node-resolve --open --watch"
   },
   "author": "",
   "license": "ISC",
@@ -12,6 +13,11 @@
     "body-parser": "^1.20.2",
     "express": "^4.19.2",
     "http": "^0.0.1-security",
-    "mariadb": "^3.3.0"
-  }
+    "mariadb": "^3.3.0",
+    "typescript": "^5.4.5"
+  },
+  "devDependencies": {
+    "@web/dev-server": "^0.4.4"
+  },
+  "keywords": []
 }
