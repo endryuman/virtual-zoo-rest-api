@@ -2,12 +2,14 @@ import * as http from "http";
 import express from "express";
 import bodyParser from "body-parser";
 import { Pool, PoolConnection, createPool } from "mariadb";
+import cors from "cors";
 
 const app = express();
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-const pool: Pool = createPool({
+export const pool: Pool = createPool({
   host: "localhost",
   user: "root",
   password: "gandro",
@@ -39,13 +41,20 @@ app.post("/animals", async (req, res) => {
   try {
     const { hologram_name, weight, superpower, extinct_since } = req.body;
     connection = await pool.getConnection();
-    const rows = await connection.query(
+    const answer = await connection.query(
       `INSERT INTO trial_tasks.virtualZoo (hologram_name, weight, superpower, extinct_since) VALUES
        ('${hologram_name}', ${weight}, '${superpower}', ${extinct_since});`
     );
+
+    const rows = await connection.query(
+      `SELECT id, hologram_name, weight, superpower, extinct_since FROM trial_tasks.virtualZoo WHERE id = ${Number(
+        answer.insertId
+      )};`
+    );
     console.log(rows);
+    const jsonS = JSON.stringify(rows);
     res.writeHead(201);
-    res.end("Animal was added");
+    res.end(jsonS);
   } catch (error) {
     console.log(error);
   } finally {
