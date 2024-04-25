@@ -23,10 +23,7 @@ app.get("/animals", async (req, res) => {
     const rows = await connection.query(
       "SELECT id, hologram_name, weight, superpower, extinct_since FROM trial_tasks.virtualZoo;"
     );
-    console.log(rows);
-    const jsonS = JSON.stringify(rows);
-    res.writeHead(200);
-    res.end(jsonS);
+    res.status(200).json(rows);
   } catch (error) {
     console.log(error);
   } finally {
@@ -51,10 +48,7 @@ app.post("/animals", async (req, res) => {
         answer.insertId
       )};`
     );
-    console.log(rows);
-    const jsonS = JSON.stringify(rows);
-    res.writeHead(201);
-    res.end(jsonS);
+    res.status(201).json({ message: "Animal was added", data: rows });
   } catch (error) {
     console.log(error);
   } finally {
@@ -82,9 +76,7 @@ app.patch("/animals/:id", async (req, res) => {
       `UPDATE trial_tasks.virtualZoo SET ${updateFieldsString}
       WHERE id = ${id};`
     );
-    console.log(rows);
-    res.writeHead(200);
-    res.end("Animal data was changed");
+    res.status(200).json({ message: "Animal data was changed" });
   } catch (error) {
     console.log(error);
   } finally {
@@ -103,9 +95,7 @@ app.delete("/animals/:id", async (req, res) => {
       `DELETE FROM trial_tasks.virtualZoo WHERE id = ${id};`,
       [id]
     );
-    console.log(rows);
-    res.writeHead(200);
-    res.end("Animal was deleted");
+    res.status(200).json({ message: "Animal was deleted" });
   } catch (error) {
     console.log(error);
   } finally {

@@ -18,6 +18,7 @@
     "typescript": "^5.4.5"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@web/dev-server": "^0.4.4"
   },
   "keywords": []
